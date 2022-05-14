@@ -8,7 +8,7 @@ module.exports = class User extends Sequelize.Model { // User모델을 만들고
                 allowNull: true, // 컬럼에 NULL을 포함하는가
                 unique: true, // 중복이 가능한가
             },
-            nink: {
+            nick: {
                 type: Sequelize.STRING(15),
                 allowNull: false,
             },

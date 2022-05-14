@@ -6,12 +6,16 @@ const path = require('path');
 const session = require('express-session');
 const nunjucks = require('nunjucks');
 const dotenv = require('dotenv');
+const passport = require('passport');
 
 dotenv.config(); // 현재 디렉토리의 .env파일을 자동으로 인식하여 환경변수를 세팅
 const pageRouter = require('./routes/page'); // 현재 디렉토리의 routes/page파일(상위 디렉토리는 ../file 로 사용)
-const { sequelize } = require('./models'); // 현재 디렉토리의 models파일의 de객체의 sequelize(MySql 연결객체)를 불러온다
+const authRouter = require('./routes/auth'); // 현재 디렉토리의 routes/auth파일을 불러옴
+const { sequelize } = require('./models'); // 현재 디렉토리의 models파일의 db객체의 sequelize(MySql 연결객체)를 불러온다
+const passportConfig = require('./passport'); // 현재 디렉토리의 passport/index.js파일을 가져온다(index.js파일은 생략가능)
 
 const app = express(); // express 객체를 app 변수에 할당, 익스프레스 내부에 http 모듈이 내장되어 있으므로 서버의 역할 가능
+passportConfig(); // 패스포트 설정
 app.set('port', process.env.PORT || 8001); // 서버가 실행될 포트를 설정, process.env 객체에 PORT속성이 있다면 그 값을 사용하고 없다면 기본값으로 300을 사용
 app.set('view engine', 'html'); // nunjucks를 템플릿 엔진으로 이용하겠다
 nunjucks.configure('views', { // 첫번째 인수로 views 폴더의 경로를 넣는다
@@ -29,7 +33,7 @@ sequelize.sync({ force: false })
 app.use(morgan('dev')); // 모든 요청에 morgan('dev')를 실행
 app.use(express.static(path.join(__dirname, 'public'))); // 디렉토리의 public파일의 정적인 파일들을 제공한다.(서버의 폴더 경로에는 public이 들어가지만 요청주소에는 public이 들어있지 않다)
 // 요청에 부합하는 정적 파일을 발견한 경우 응답으로 해당 파일을 전송한다, 이 경우 다음에 나오는 라우터가 실행되지 않는다. 만약 파일을 찾지 못했다면 요청을 라우터로 넘긴다(떄문에 최대한 위쪽에 배치하자)
-app.use(express.json());
+app.use(express.json()); // 35,36코드는 body-parser미들웨어, 내부적으로 스트림을 처리해 req.body에 추가
 app.use(express.urlencoded({ extended: false })); // true면 qs모듈을 사용하고, fasle면 query-string 모듈을 사용한다
 app.use(cookieParser(process.env.COOKIE_SECRET));
 app.use(session({
@@ -41,8 +45,11 @@ app.use(session({
         secure: false, // http가 아닌 환경에서도 사용할 수 있다
     },
 }));
+app.use(passport.initialize()); // 모든 요청에 passport가 구동된다
+app.use(passport.session()); // 세션 연결(req.session객체에 passport 정보를 저장), 세션 미들웨어보다 뒤에 연결
 
 app.use('/', pageRouter); // 요청이 '/'인 경우 pageRouter을 실행
+app.use('/auth', authRouter);
 
 app.use((req,res,next) => { // 요청이 없는경우(찾지 못한 경우)
     const error = new Error(`${req.method} ${req.url} 라우터가 없습니다`);
