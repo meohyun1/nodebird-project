@@ -32,6 +32,8 @@
             <div class="twit-author">{{twit.User.nick}}</div>
             {% if not followerIdList.includes(twit.User.id) and twit.User.id !== user.id %} <!-- 나의 팔로워 아이디 목록에 게시글의 작성자 아이디가 없는 경우 팔로우 버튼 추가-->
               <button class="twit-follow">팔로우하기</button>
+            {% elif followerIdList.includes(twit.User.id) and twit.User.id !== user.id %} <!-- 나의 팔로워 아이디 목록에 게시글의 작성자 아이디가 있는 경우 팔로우 끊기 버튼 추가-->
+              <button class="twit-follow-destory">팔로우끊기</button>
             {% endif %}
             <div class="twit-content">{{twit.content}}</div>
             {% if twit.img %}
@@ -69,6 +71,25 @@
           if (userId !== myId.value) {
             if (confirm('팔로잉하시겠습니까?')) {
               axios.post(`/user/${userId}/follow`)
+                .then(() => {
+                  location.reload();
+                })
+                .catch((err) => {
+                  console.error(err);
+                });
+            }
+          }
+        }
+      });
+    });
+    document.querySelectorAll('.twit-follow-destory').forEach(function(tag) {
+      tag.addEventListener('click', function() {
+        const myId = document.querySelector('#my-id');
+        if (myId) {
+          const userId = tag.parentNode.querySelector('.twit-user-id').value;
+          if (userId !== myId.value) {
+            if (confirm('팔로우를 끊으시겠습니까?')) {
+              axios.post(`/user/${userId}/follow-destory`)
                 .then(() => {
                   location.reload();
                 })

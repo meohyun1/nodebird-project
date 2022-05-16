@@ -12,7 +12,13 @@
       <div class="profile-wrap">
         <div class="profile">
           {% if user and user.id %} <!--user과 user.id가 참이면(user가 존재하면) 아래 내용 출력-->
+          <div>
             <div class="user-name">{{'안녕하세요! ' + user.nick + '님'}}</div>
+            <form method="post" action="user/update">
+              <input type="text" id="nick" name="nick">
+              <button id="update">수정하기</button>
+            </form>
+          </div>
             <div class="half">
               <div>팔로잉</div>
               <div class="count following-count">{{followingCount}}</div>
@@ -55,6 +61,16 @@
           alert(new URL(location.href).searchParams.get('loginError'));
         }
       };
+      document.getElementById('nick').style.display = 'none';
+      document.querySelectorAll('#update').forEach(function(tag) {
+      tag.addEventListener('click', function() {
+        const myId = document.querySelector('#my-id');
+        if (myId) {
+          let result = prompt('바꾸고 싶은 닉네임을 입력하시오');
+          document.getElementById('nick').value = result;
+        }
+      });
+      });
     </script> <!--window객체를 웹 문서를 불러올때, 문서가 사용되는 시점에 실행되는 onload라는 함수를 다시 재정의 한다-->
     <!-- URL에서 loginError과 대조되는 값을 찾아서 불러온다-->
     {% block script %}
