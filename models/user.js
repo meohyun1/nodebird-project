@@ -39,6 +39,7 @@ module.exports = class User extends Sequelize.Model { // User모델을 만들고
 
     static associate(db) { // 다른 모델과의 관계를 설정
         db.User.hasMany(db.Post);
+        db.User.belongsToMany(db.Post, { through: 'Like'});
         db.User.belongsToMany(db.User, {
             foreignKey: 'followingId', // 외래키 이름, 외래키 이름을 설정하지 않으면 UserId가 된다
             as: 'Followers', // 찾고 싶은 데이터라고 치면, 팔로워들을 찾고싶으면 먼저 팔로잉하는 아이디를 찾아야한다

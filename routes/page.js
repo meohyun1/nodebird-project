@@ -26,12 +26,19 @@ router.get('/', async (req, res, next) => { // 요청이 /로 들어오면 아�
     try {
     // const twits = []; // twits배열 생성, 이젠 필요없다
     const posts = await Post.findAll({ // 모든 게시글 조회
-        include: { // join한다
+        include: [{ // join한다
             model: User,
             attributes: ['id', 'nick'], // 게시글 속성은 아이디와 닉네임
-        },
+        }, {
+            model: User,
+            attributes: ['id', 'nick'],
+            as: 'Liker',
+        }],
         order: [['createdAt', 'DESC']], // 생성된 시간순으로 내림차순(최신순)
     });
+    if(req.user) {
+        posts.forEach((post) => post.liked = !!post.Liker.find((v) => v.id === req.user.id));
+    }
     res.render('main', { // views폴더의 main.html를 가져와 렌더링한다
         title: 'NodeBird', // 템플릿 엔진의 변수
         twits: posts, // 데이터베이스에서 조회한 결과를 넣는다

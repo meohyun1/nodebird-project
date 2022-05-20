@@ -25,6 +25,7 @@ module.exports = class Post extends Sequelize.Model { // Post모델을 만들고
 
   static associate(db) {
       db.Post.belongsTo(db.User);
-      db.Post.belongsToMany(db.Hashtag, {through: 'PostHashtag' }); // 중간 테이블 PostHashtag이 생성된다
+      db.Post.belongsToMany(db.Hashtag, { through: 'PostHashtag' }); // 중간 테이블 PostHashtag이 생성된다
+      db.Post.belongsToMany(db.User, { through: 'Like', as: 'Liker' });
   }
 };
